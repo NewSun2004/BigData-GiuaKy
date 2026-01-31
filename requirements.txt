@@ -1,0 +1,10 @@
+# Core Streamlit
+streamlit>=1.30.0
+
+# Critical: Vaex is incompatible with NumPy 2.0+ as of early 2026
+numpy<2.0.0
+
+# Vaex components
+vaex-core>=4.17.0
+vaex-viz
+vaex-ml
