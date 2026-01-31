@@ -1,72 +1,9 @@
-import pandas as pd
-from pymongo import MongoClient
+%%writefile app.py
 import streamlit as st
+import pandas as pd
 import vaex
 import matplotlib.pyplot as plt
-
-# 1. Connect
-connection_string = "mongodb+srv://chuthihoainu2004_db_user:F8d6qLpOGhd3YLuQ@vpandas.z8hw3tg.mongodb.net/"
-
-try:
-    # 2. Kết nối
-    client = MongoClient(connection_string)
-
-    # 3. Trỏ đúng vào Database và Collection
-    db = client["Vpandas"]
-    collection = db["Fight_data"]
-
-    # 4. Lấy toàn bộ dữ liệu về (hàm .find({}))
-    # Ta chuyển kết quả thành một danh sách (list)
-    data_from_atlas = list(collection.find({}))
-
-    # 5. Chuyển thành DataFrame để xem và xử lý
-    if len(data_from_atlas) > 0:
-        df_new = pd.DataFrame(data_from_atlas)
-
-        if '_id' in df_new.columns:
-            df_new = df_new.drop(columns=['_id'])
-
-        print(f"✅ Đã lấy thành công {len(df_new)} dòng dữ liệu từ Atlas về!")
-        print("--- 5 dòng đầu tiên của dữ liệu ---")
-        print(df_new.head())
-    else:
-        print("⚠️ Collection 'Fight_data' hiện đang trống, hãy kiểm tra lại bước đẩy data.")
-
-except Exception as e:
-    print(f"❌ Có lỗi xảy ra khi lấy dữ liệu: {e}")
-
-# Giả sử bạn đã có df_new từ bước lấy dữ liệu trước đó
-# Chuyển đổi từ Pandas sang Vaex DataFrame
-vdf = vaex.from_pandas(df_new)
-
-print("--- PHÂN TÍCH VÉ MÁY BAY VỚI VAEX ---")
-
-# 1. Thống kê nhanh các cột số (như Price)
-# Vaex tính toán các giá trị thống kê cực nhanh
-print(vdf.describe())
-
-# 2. Tạo cột ảo: Giả sử bạn muốn xem giá vé sau thuế (ví dụ 10%)
-# Cột ảo này không tốn RAM, chỉ tính khi cần hiển thị
-vdf['Price_with_Tax'] = vdf.Price * 1.1
-print("\n✅ Đã tạo cột ảo 'Price_with_Tax'")
-
-# 3. Phân tích giá vé trung bình theo từng hãng hàng không (Airline)
-# Đây là thao tác GroupBy mạnh mẽ của Vaex
-alpine_stats = vdf.groupby(by='Airline', agg={'Average_Price': vaex.agg.mean('Price')})
-alpine_stats = alpine_stats.sort('Average_Price', ascending=False)
-print("\n--- Giá vé trung bình theo hãng hàng không ---")
-print(alpine_stats)
-
-# 4. Tìm các chuyến bay có thời gian bay (Duration) lâu nhất
-# Lưu ý: Vaex hỗ trợ lọc (filter) mà không tạo bản sao dữ liệu
-long_flights = vdf[vdf.Duration.str.contains('h')] # Lọc các chuyến có tiếng (hours)
-print(f"\nSố lượng chuyến bay dài: {len(long_flights)}")
-
-# 5. Vẽ biểu đồ phân phối giá vé
-plt.figure(figsize=(12, 6))
-vdf.viz.histogram(vdf.Price, xlabel='Giá (Rupee)', color='skyblue')
-plt.title('Phân phối giá vé máy bay') # Đặt tiêu đề riêng biệt
-plt.show()
+from pymongo import MongoClient
 
 # --- 1. CẤU HÌNH GIAO DIỆN WEB ---
 st.set_page_config(page_title="Phân Tích Vé Máy Bay", layout="wide")
