@@ -3,6 +3,7 @@ streamlit>=1.30.0
 
 pymongo
 joblib
+scikit-learn
 
 # Critical: Vaex is incompatible with NumPy 2.0+ as of early 2026
 numpy<2.0.0
