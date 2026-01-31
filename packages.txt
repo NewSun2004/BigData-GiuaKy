@@ -1,0 +1,3 @@
+build-essential
+libpcre3-dev
+python3-dev
